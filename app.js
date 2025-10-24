@@ -1,14 +1,12 @@
+require('dotenv').config(); // Carrega as variáveis de ambiente
 const express = require('express');
+const jwt = require('jsonwebtoken'); // Biblioteca para JWT
+const bcrypt = require('bcryptjs'); // Biblioteca para Hash de Senhas
 const app = express();
 const PORT = 3000;
 
+// Middleware para processar JSON
 app.use(express.json());
-
-app.listen(PORT, () =>{
-    console.log(`Servidor rodando em http://localhost:${PORT}/sobre`);
-    console.log(`Para parar o servidor, pressione Ctrl + C no terminal`)
-}
-);
 
 /*const testes  = [
     {
@@ -21,18 +19,6 @@ app.listen(PORT, () =>{
     }
 ];*/
 
-app.get('/api/filmes',(req,res) => {
-    res.json(filmes);
-});
-
-app.get('/',(req,res) => {
-    res.send('Bem vindo ao teste!!!!');
-});
-
-app.get('/sobre',(req,res) => {
-    console.log("A maior jóia no mundo dos cinéfilos dos tempos recentes");
-});
-
 let filmes = [
   {id: 1, nome: 'Onde os Fracos Não Têm Vez', anoLancamento: 2007},
   {id: 2, nome: 'O Iluminado', anoLancamento: 1980},
@@ -41,32 +27,90 @@ let filmes = [
 
 let nextId = 4;
 
-app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
-  console.log('Para parar o servidor, pressione Ctrl + C no terminal');
-});
+// Usuários Simulados (Com Senhas HASHEADAS)
+// Senha padrão para todos: "123456"
+const usuarios = [
+  // Hash para a senha "123456"
+  { id: 1, email: 'admin@app.com', passwordHash: '', role: 'admin' },
+  { id: 2, email: 'user@app.com', passwordHash: '', role: 'user' }
+];
 
-app.post('/api/filmes', (req, res) => { 
+// Middleware de Verificação de Token
+const verifyToken = (req, res, next) => {
+  // 1. Extrai o token do cabeçalho 'Authorization' (Esperado: Bearer <TOKEN>)
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+      return res.status(401).json({ message: 'Acesso negado. Token não fornecido.' });
+  }
+
+  try {
+      // 2. Verifica e decodifica o token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      // 3. Anexa os dados do usuário à requisição (req.user)
+      req.user = decoded;
+
+      // 4. Continua o processamento da requisição
+      next();
+  } catch (err) {
+      // Token inválido (expirado, adulterado, etc.)
+      return res.status(403).json({ message: 'Token inválido ou expirado.' });
+  }
+};
+
+// Rota POST para criar um novo filme (AGORA PROTEGIDA)
+app.post('/api/filmes', verifyToken, (req, res) => { 
+    // A lógica de negócio só é executada se o token for válido
   const { nome, anoLancamento } = req.body;
 
-  if (!nome || !anoLancamento) {
+  if (!nome || anoLancamento === undefined) {
     return res.status(400).json({ message: 'Nome e ano de lançamento são obrigatórios.' });
   }
 
-  const novoFilme = { id: nextId++, nome, anoLancamento };
-  
+  const novoFilme = { 
+    id: nextId++, 
+    nome,
+    anoLancamento,
+    createdBy: req.user.id // Exemplo de uso da informação do token
+  };
+
   filmes.push(novoFilme);
   res.status(201).json(novoFilme);
 });
 
-app.put('api/filmes/:id', (req, res) => {
+// Rota GET para Ler todos os Filmes
+app.get('/api/filmes', verifyToken, (req, res) => {
+  // Só roda se o token for válido
+  res.json(filmes);
+});
+
+app.get('/api/filmes/:id', verifyToken, (req, res) => {
+  // Só roda se o token for válido
+  res.json(filmes);
+});
+
+// Rota GET para Página inicial
+app.get('/', verifyToken, (req, res) => {
+  res.send('Bem-vindo ao teste!');
+});
+
+// Rota GET para Página Sobre
+app.get('/sobre', verifyToken, (req, res) => {
+  console.log("A maior jóia no mundo dos cinéfilos dos tempos recentes");
+  res.send('Página Sobre');
+});
+
+// Rota PUT para Atualizar um Filme existente
+app.put('/api/filmes/:id', verifyToken, (req, res) => {
   const id = parseInt(req.params.id);
   const filmeIndex = filmes.findIndex(f => f.id === id);
 
   if (filmeIndex !== -1) {
     const { nome, anoLancamento } = req.body;
 
-    if (!nome && !anoLancamento) {
+    if (!nome && anoLancamento === undefined) {
       return res.status(400).json({ message: 'Forneça pelo menos um campo (nome ou ano de lançamento) para atualização.' });
     }
 
@@ -77,14 +121,13 @@ app.put('api/filmes/:id', (req, res) => {
     };
 
     res.json(filmes[filmeIndex]);
-  }
-
-  else {
-    res.status(404).json({ message: 'Filme não encontrado para atualização.'});
+  } else {
+    res.status(404).json({ message: 'Filme não encontrado para atualização.' });
   }
 });
 
-app.delete('api/filmes/:id', (req, res) => {
+// Rota DELETE para Deletar um Filme
+app.delete('/api/filmes/:id', verifyToken, (req, res) => {
   const id = parseInt(req.params.id);
   const initialLength = filmes.length;
 
@@ -95,4 +138,10 @@ app.delete('api/filmes/:id', (req, res) => {
   } else {
     res.status(404).json({ message: 'Filme não encontrado para exclusão.' });
   }
+});
+
+// Iniciar o Servidor
+app.listen(PORT, () => {
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
+  console.log(`Para parar o servidor, pressione Ctrl + C no terminal`);
 });
