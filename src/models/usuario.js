@@ -1,8 +1,8 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../database/database.js');
 
-//Definição do Modelo 'Filme'
-const usuario = sequelize.define('Usuario', {
+// Definição do Modelo 'Usuario'
+const Usuario = sequelize.define('Usuario', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -12,21 +12,23 @@ const usuario = sequelize.define('Usuario', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    Email: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-    },
-    Senha : {
+    email: {
         type: DataTypes.STRING,
-        allowNull:false
+        allowNull: false,
+        unique: true // Garante que não existam e-mails duplicados no banco
     },
-    genero : {
+    senha: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    role: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: 'user' // Por padrão, cria como usuário comum
     }
 }, {
-    tableName: 'FILMES',
+    tableName: 'USUARIOS',
     timestamps: false
 });
 
-module.exports = Filme;
+module.exports = Usuario;
