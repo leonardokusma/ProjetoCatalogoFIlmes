@@ -173,16 +173,16 @@
         // --- ADICIONAR FILME (COM NOVOS CAMPOS) ---
         async function adicionarFilme() {
             // Pegando valores
-            const titulo = document.getElementById('novoNome').value; // Backend espera 'titulo' ou 'nome'? Ajuste aqui.
-            const ano_lancamento = document.getElementById('novoAno').value;
+            const nome = document.getElementById('novoNome').value;
+            const anoLancamento = document.getElementById('novoAno').value;
             const diretor = document.getElementById('novoDiretor').value;
             const genero = document.getElementById('novoGenero').value;
 
-            if(!titulo || !ano_lancamento) return alert('Título e Ano são obrigatórios');
+            if(!nome || !anoLancamento) return alert('Nome e Ano são obrigatórios');
 
             const payload = {
-                titulo, // ou nome: titulo
-                ano_lancamento, // ou anoLancamento: ano_lancamento
+                nome, 
+                anoLancamento, 
                 diretor,
                 genero
             };
