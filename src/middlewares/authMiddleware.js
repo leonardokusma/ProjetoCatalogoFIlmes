@@ -1,5 +1,4 @@
 require('dotenv').config();
-console.log("TESTE -> JWT_SECRET:", process.env.JWT_SECRET);
 const jwt = require('jsonwebtoken');
 
 // Middleware de verificação de token JWT

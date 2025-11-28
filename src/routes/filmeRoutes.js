@@ -6,6 +6,7 @@ const { verificaToken, verificaAdmin } = require('../middlewares/authMiddleware'
 // --- ROTAS PÚBLICAS (qualquer um pode ver. Sem autenticação) ---
 
 // Rota "estou com sorte!" que retorna um filme aleatório
+// GET /api/filmes/aleatorio
 router.get('/aleatorio', filmeController.buscarFilmesAleatorios)
 
 // Listar todos os filmes

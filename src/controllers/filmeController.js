@@ -33,12 +33,12 @@ exports.buscarFilmePorId = async (req, res) => {
 exports.criarFilme = async (req, res) => { 
     const { nome, anoLancamento, diretor, genero} = req.body;
 
-    if (!nome || anoLancamento || diretor  || genero === undefined) {
-        return res.status(400).json({ message: 'Nome, ano de lançamento, diretor e genero são obrigatórios.' });
+    if (!nome || !anoLancamento || !diretor  || !genero) {
+        return res.status(400).json({ message: 'Nome, ano de lançamento, diretor e gênero são obrigatórios.' });
     }
 
     try {
-        const novoFilme = await Filme.create({ nome, anoLancamento, diretor,genero});
+        const novoFilme = await Filme.create({ nome, anoLancamento, diretor, genero});
         res.status(201).json(novoFilme)
     } catch (err) {
         res.status(500).json({ message: 'Ocorreu um erro no servidor ao criar o filme.' });
@@ -56,12 +56,12 @@ exports.atualizarFilme = async (req, res) => {
     const id = parseInt(req.params.id);
     const { nome, anoLancamento, diretor, genero} = req.body;
 
-    if (!nome && anoLancamento === undefined) {
+    if (!nome && !anoLancamento && !diretor && !genero) {
         return res.status(400).json({ message: 'Forneça pelo menos um campo (nome ou ano de lançamento) para atualização.' });
     }
 
     try {
-        const [updated] = await Filme.update({ nome, anoLancamento,diretor,genero}, {
+        const [updated] = await Filme.update({ nome, anoLancamento, diretor, genero}, {
             where: { id: id }
         });
 

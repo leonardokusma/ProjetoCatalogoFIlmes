@@ -1,4 +1,5 @@
 require('dotenv').config(); // Carrega as variáveis de ambiente
+const cors = require('cors');
 const express = require('express');
 const jwt = require('jsonwebtoken'); // Biblioteca para JWT
 const bcrypt = require('bcryptjs'); // Biblioteca para Hash de Senhas
@@ -6,6 +7,9 @@ const sequelize = require('./src/database/database.js');
 const Filme = require('./src/models/filme.js');
 const app = express();
 const PORT = 3000;
+
+// Libera acesso de qualquer origem
+app.use(cors());
 
 // Middleware para processar JSON
 app.use(express.json());
