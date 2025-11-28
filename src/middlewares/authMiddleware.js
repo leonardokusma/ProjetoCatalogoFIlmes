@@ -26,3 +26,10 @@ exports.verificaToken = (req, res, next) => {
       return res.status(403).json({ message: 'Token inválido ou expirado.' });
   }
 };
+
+exports.verificaAdmin = (req, res, next) => {
+  if (!req.usuario || req.usuario.role !== 'admin') {
+    return res.status(403).json({ message: 'Acesso permitido apenas para administradores.' });
+  }
+  next();
+};

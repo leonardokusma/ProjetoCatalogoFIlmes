@@ -4,7 +4,9 @@ const bcrypt = require('bcryptjs'); // Biblioteca para Hash de Senhas
 
 // Usuários Simulados (Com Senhas HASHEADAS)
 // Senha padrão para todos: "123456"
-const usuarios = [];
+const usuarios = [ 
+    { id: 1, nome: 'Ademir', email: 'admin@app.com', passwordHash:'',role: 'admin'}
+];
 //   Hash para a senha "123456"
 //   { id: 1, email: 'admin@app.com', passwordHash: '', role: 'admin' },
 //   { id: 2, email: 'user@app.com', passwordHash: '', role: 'user' }
@@ -49,9 +51,12 @@ exports.login = (req, res) => {
         return res.status(401).json({ message: "Credenciais inválidas." });
     }
 
+    //const usuario = [
+    //
+
     // Se as credenciais forem válidas, gerar o token JWT para autenticação
     const token = jwt.sign(
-        { id: usuario.id, nome: usuario.nome},
+        { id: usuario.id, nome: usuario.nome, role: usuarios.role},
         process.env.JWT_SECRET,
         { expiresIn: '1d' }
     );
