@@ -94,3 +94,21 @@ exports.deletarFilme = async (req, res) => {
         res.status(500).json({ message: 'Erro no servidor ao deletar filme.' });
     }
 };
+
+exports.buscarFilmesAleatorios = async (req, res) => {
+    try {
+        // Pega a quantidade via query param ou define 1 como padrão
+        const quantidade = parseInt(req.query.limit) || 1;
+
+        const filmes = await Filme.findAll({
+            // 'Filme.sequelize.random()' gera a query correta (RAND ou RANDOM) dependendo do banco
+            order: Filme.sequelize.random(),
+            limit: quantidade
+        });
+
+        res.json(filmes);
+    } catch (err) {
+        console.error(err); // Log do erro para o desenvolvedor
+        res.status(500).json({ message: "Erro ao buscar filmes aleatórios." });
+    }
+};

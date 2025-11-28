@@ -13,5 +13,6 @@ router.get('/:id', filmeController.buscarFilmePorId);
 router.post('/', verificaToken, filmeController.criarFilme);
 router.put('/:id', verificaToken, filmeController.atualizarFilme);
 router.delete('/:id', verificaToken, filmeController.deletarFilme);
+router.get('/',verificaToken,filmeController.buscarFilmesAleatorios)
 
 module.exports = router;
