@@ -2,11 +2,24 @@ require('dotenv').config(); // Carrega as variáveis de ambiente
 const express = require('express');
 const jwt = require('jsonwebtoken'); // Biblioteca para JWT
 const bcrypt = require('bcryptjs'); // Biblioteca para Hash de Senhas
+const sequelize = require('./src/database/database.js');
+const Filme = require('./src/models/filme.js');
 const app = express();
 const PORT = 3000;
 
 // Middleware para processar JSON
 app.use(express.json());
+
+// Sincronização do Banco
+async function syncDatabase() {
+  try {
+    await sequelize.sync();
+    console.log('Banco de dados sincronizado com sucesso.');
+  } catch (err) {
+    console.error('Erro ao sincronizar o banco de dados: ', err);
+  }
+}
+syncDatabase();
 
 // Importação dos arquivos de rotas
 const filmeRoutes = require('./src/routes/filmeRoutes');

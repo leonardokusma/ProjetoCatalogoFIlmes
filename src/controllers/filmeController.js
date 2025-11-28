@@ -1,44 +1,47 @@
-let filmes = [
-  {id: 1, nome: 'Onde os Fracos Não Têm Vez', anoLancamento: 2007},
-  {id: 2, nome: 'O Iluminado', anoLancamento: 1980},
-  {id: 3, nome: 'Interestelar', anoLancamento: 2014}
-];
-
-let nextId = 4;
+const Filme = require('../models/filme');
 
 //Função para retornar todos os filmes
-exports.listarFilmes = (req, res) => {
-    res.json(filmes);
-}
+// GET
+exports.listarFilmes = async (req, res) => {
+    try {
+        const filmes = await Filme.findAll();
+        res.json(filmes);
+    } catch (err) {
+        res.status(500).json({ message: "Ocorreu um erro no servidor ao buscar os filmes."});
+    }
+};
 
 //Função para retornar um filme por ID
-exports.buscarFilmePorId = (req, res) => {
-    const idFilme = parseInt(req.params.id);
-    const filmeEncontrado = filmes.find(f => f.id === idFilme);
+exports.buscarFilmePorId = async (req, res) => {
+    const id = parseInt(req.params.id);
+    
+    try {
+        const filmeEncontrado = await Filme.findByPk(id);
 
-    if(filmeEncontrado) {
-        res.json(filmeEncontrado);
-    } else {
-        res.status(404).send('Filme não encontrado!');
+        if(filmeEncontrado) {
+            res.json(filmeEncontrado);
+        } else {
+            res.status(404).send('Filme não encontrado!');
+        }
+    } catch (err) {
+        res.status(500).json({message : 'Erro no servidor.' });
     }
 };
 
 // Função para criar um novo filme
-exports.criarFilme = (req, res) => { 
-  const { nome, anoLancamento } = req.body;
+exports.criarFilme = async (req, res) => { 
+    const { nome, anoLancamento } = req.body;
 
-  if (!nome || anoLancamento === undefined) {
-    return res.status(400).json({ message: 'Nome e ano de lançamento são obrigatórios.' });
-  }
+    if (!nome || anoLancamento === undefined) {
+        return res.status(400).json({ message: 'Nome e ano de lançamento são obrigatórios.' });
+    }
 
-  const novoFilme = { 
-    id: nextId++, 
-    nome,
-    anoLancamento
-  };
-
-  filmes.push(novoFilme);
-  res.status(201).json(novoFilme);
+    try {
+        const novoFilme = await Filme.create({ nome, anoLancamento });
+        res.status(201).json(novoFilme)
+    } catch (err) {
+        res.status(500).json({ message: 'Ocorreu um erro no servidor ao criar o filme.' });
+    }
 };
 
 // Função para retornar as infos da Página Sobre
@@ -48,39 +51,45 @@ exports.sobre = (req, res) => {
 };
 
 // Função para atualizar um filme pela ID
-exports.atualizarFilme = (req, res) => {
-  const id = parseInt(req.params.id);
-  const filmeIndex = filmes.findIndex(f => f.id === id);
-
-  if (filmeIndex !== -1) {
+exports.atualizarFilme = async (req, res) => {
+    const id = parseInt(req.params.id);
     const { nome, anoLancamento } = req.body;
 
     if (!nome && anoLancamento === undefined) {
-      return res.status(400).json({ message: 'Forneça pelo menos um campo (nome ou ano de lançamento) para atualização.' });
+        return res.status(400).json({ message: 'Forneça pelo menos um campo (nome ou ano de lançamento) para atualização.' });
     }
 
-    filmes[filmeIndex] = {
-      ...filmes[filmeIndex],
-      nome: nome !== undefined ? nome : filmes[filmeIndex].nome,
-      anoLancamento: anoLancamento !== undefined ? anoLancamento : filmes[filmeIndex].anoLancamento
-    };
+    try {
+        const [updated] = await Filme.update({ nome, anoLancamento }, {
+            where: { id: id }
+        });
 
-    res.json(filmes[filmeIndex]);
-  } else {
-    res.status(404).json({ message: 'Filme não encontrado para atualização.' });
-  }
+        if (updated) {
+            const filmeAtualizado = await Filme.findByPk(id);
+            res.json(filmeAtualizado);
+        } else {
+            res.status(404).json({ message: 'Filme não encontrado para atualização.' });
+        } 
+    } catch (err) {
+        res.status(500).json({ message: 'Erro no servidor ao atualizar filme.' });
+    }
 };
 
 // Função para deletar um filme pela ID
-exports.deletarFilme = (req, res) => {
-  const id = parseInt(req.params.id);
-  const initialLength = filmes.length;
+exports.deletarFilme = async (req, res) => {
+    const id = parseInt(req.params.id);
 
-  filmes = filmes.filter(f => f.id !== id);
+    try {
+        const deleted = await Filme.destroy({
+            where: { id: id }
+        });
 
-  if (filmes.length < initialLength) {
-    res.status(204).send();
-  } else {
-    res.status(404).json({ message: 'Filme não encontrado para exclusão.' });
-  }
+        if (deleted) {
+            res.status(204).send();
+        } else {
+            res.status(404).json({ message: 'Filme não encontrado para exclusão.'})
+        }
+    } catch (err) {
+        res.status(500).json({ message: 'Erro no servidor ao deletar filme.' });
+    }
 };

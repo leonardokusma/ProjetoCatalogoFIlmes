@@ -52,7 +52,7 @@ exports.login = (req, res) => {
     // Se as credenciais forem válidas, gerar o token JWT para autenticação
     const token = jwt.sign(
         { id: usuario.id, nome: usuario.nome},
-        JWT_SECRET,
+        process.env.JWT_SECRET,
         { expiresIn: '1d' }
     );
 
