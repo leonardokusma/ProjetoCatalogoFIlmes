@@ -15,6 +15,14 @@ const Filme = sequelize.define('Filme', {
     anoLancamento: {
         type: DataTypes.INTEGER,
         allowNull: false
+    },
+    diretor : {
+        type: DataTypes.STRING,
+        allowNull:false
+    },
+    genero : {
+        type: DataTypes.STRING,
+        allowNull: false
     }
 }, {
     tableName: 'FILMES',

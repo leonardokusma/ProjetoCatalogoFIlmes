@@ -1,3 +1,4 @@
+const { dir } = require('console');
 const Filme = require('../models/filme');
 
 //Função para retornar todos os filmes
@@ -30,14 +31,14 @@ exports.buscarFilmePorId = async (req, res) => {
 
 // Função para criar um novo filme
 exports.criarFilme = async (req, res) => { 
-    const { nome, anoLancamento } = req.body;
+    const { nome, anoLancamento, diretor, genero} = req.body;
 
-    if (!nome || anoLancamento === undefined) {
-        return res.status(400).json({ message: 'Nome e ano de lançamento são obrigatórios.' });
+    if (!nome || anoLancamento || diretor  || genero === undefined) {
+        return res.status(400).json({ message: 'Nome, ano de lançamento, diretor e genero são obrigatórios.' });
     }
 
     try {
-        const novoFilme = await Filme.create({ nome, anoLancamento });
+        const novoFilme = await Filme.create({ nome, anoLancamento, diretor,genero});
         res.status(201).json(novoFilme)
     } catch (err) {
         res.status(500).json({ message: 'Ocorreu um erro no servidor ao criar o filme.' });
@@ -53,14 +54,14 @@ exports.sobre = (req, res) => {
 // Função para atualizar um filme pela ID
 exports.atualizarFilme = async (req, res) => {
     const id = parseInt(req.params.id);
-    const { nome, anoLancamento } = req.body;
+    const { nome, anoLancamento, diretor, genero} = req.body;
 
     if (!nome && anoLancamento === undefined) {
         return res.status(400).json({ message: 'Forneça pelo menos um campo (nome ou ano de lançamento) para atualização.' });
     }
 
     try {
-        const [updated] = await Filme.update({ nome, anoLancamento }, {
+        const [updated] = await Filme.update({ nome, anoLancamento,diretor,genero}, {
             where: { id: id }
         });
 
